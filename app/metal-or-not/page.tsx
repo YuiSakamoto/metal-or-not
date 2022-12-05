@@ -10,7 +10,7 @@ import {
 import Loading from "./loading";
 
 export default function Home() {
-  const fqdn = process.env.FQDN || "http://localhost3000";
+  const fqdn = process.env.VERCEL_URL || "http://localhost3000";
   const [model, setModel] = useState<tf.LayersModel | null>(null);
   const [recognizer, setRecognizer] = useState<SpeechCommandRecognizer>(
     create(
