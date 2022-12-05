@@ -14,7 +14,7 @@ interface PredictResult {
 }
 
 export default function Home() {
-  const fqdn = process.env.VERCEL_URL || "http://localhost:3000";
+  const fqdn = process.env.NEXT_PUBLIC_VERCEL_URL || "http://localhost:3000";
   const [model, setModel] = useState<tf.LayersModel | null>(null);
   const [recognizer, setRecognizer] = useState<SpeechCommandRecognizer>(
     create(
