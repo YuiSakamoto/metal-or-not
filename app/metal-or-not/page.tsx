@@ -9,8 +9,12 @@ import {
 
 import Loading from "./loading";
 
+interface PredictResult {
+  [key: number]: Float32Array;
+}
+
 export default function Home() {
-  const fqdn = process.env.VERCEL_URL || "http://localhost3000";
+  const fqdn = process.env.VERCEL_URL || "http://localhost:3000";
   const [model, setModel] = useState<tf.LayersModel | null>(null);
   const [recognizer, setRecognizer] = useState<SpeechCommandRecognizer>(
     create(
@@ -21,7 +25,11 @@ export default function Home() {
     )
   );
   const [labels, setLabels] = useState<string[]>([]);
-  const [predictionResult, setPredictionResult] = useState<{}>({});
+  const [predictionResult, setPredictionResult] = useState<PredictResult>({
+    0: new Float32Array(0),
+    1: new Float32Array(0),
+    2: new Float32Array(0),
+  });
   const [stream, setStream] = useState<MediaStream | null>(null);
 
   // モデルをtfjsで読み込む
@@ -60,8 +68,8 @@ export default function Home() {
       }
       recognizer.listen(
         async (result) => {
-          const scores = result.scores;
-          setPredictionResult((prev) => ({ ...prev, ...result.scores }));
+          const scores = result.scores as PredictResult;
+          setPredictionResult((prev) => ({ ...prev, ...scores }));
         },
         {
           includeSpectrogram: true, // in case listen should return result.spectrogram
@@ -73,8 +81,9 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
+
     // Stop the recognition in 5 seconds.
-    setTimeout(() => recognizer.stopListening(), 5000);
+    setTimeout(() => recognizer.stopListening(), 60000);
   }, [labels, recognizer, stream]);
 
   return (
@@ -97,12 +106,14 @@ export default function Home() {
                   <td>
                     <div
                       style={{
-                        width: predictionResult[i] * 100 + "%",
+                        width: (predictionResult[i] as any) * 100 + "%",
                         height: "40px",
                         backgroundColor: "red",
                       }}
                     ></div>
-                    <div>{Math.round(predictionResult[i] * 10000) / 100} %</div>
+                    <div>
+                      {Math.round((predictionResult[i] as any) * 10000) / 100} %
+                    </div>
                   </td>
                 </tr>
               ))}
